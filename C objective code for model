@@ -1,0 +1,111 @@
+ / S t e p    I  ( i n i t i a l i z a t i o n )   - C r e a t e   n o d e s ,    l a y e r s   a n d   n o r m a l i z e d   w e i g h t s   
+inputLayer =  [OrdCltn n e w ] ;   
+o u t p u t L a y e r    =  [OrdCltn n e w ] ;   
+r a n d G e n    =  [ R a n d G e n   c r e a t e :    " u n i f o r m "   p a r a m   I :   50.0 p a r a m 2 : 1 0 0 . 0    s e e d :   10011 ]; 
+for (i  =  0;  i <  n r I n p u t N o d e s ;    i +   +) / / i n p u t    l a y e r   n o d e s   
+{ 
+n o d e    =  [BasicNode create]; 
+[ i n p u t L a y e r   a d d :   n o d e ] ;   
+} 
+for (i  =  0;  i <  n r O u t p u t N o d e s ;    i +   +) / / o u t p u t    l a y e r   n o d e s   
+{ 
+d o u b l e   m a g ,    randNr,  weights{10]; 
+n o d e    =  [BasicNode create]; 
+[ o u t p u t L a y e r   a d d : n o d e ] ;   
+m a g   =  0.0; 
+for {j  =  0; j <  n r I n p u t N o d e s ;    j + +) 
+{ 
+r a n d N r    =  (double)  [ r a n d G e n   n e x t R a n d o m ] ;   
+weights{j]  =  r a n d N r ;   
+m a g    + =  p o w ( r a n d N r ,    2.0); 
+} 
+m a g    =  s q r t ( m a g ) ;   
+for (j  =  0;  j <  n r I n p u t N o d e s ;    j + + )   
+{ 
+weights{j]  =  w e i g h t s [ j ] / m a g ;   
+[node a d d P r e d e c e s s o r :   [ i n p u t L a y e r   at:  j]  w e i g h t :   weights{j]]; 
+} 
+} 
+
+ / S t e p    2  - c r e a t e    c o m p L r n U p d t    a n d   n e t w o r k S t a t e    o b j e c t s   
+c o m p L r n U p d t    =  [ C o m p L r n U p d t   c r e a t e F o r L a y e r : o u t p u t L a y e r   l r n R a t e : l r n R a t e   
+d e c a y R a t e P e r c e n t :   d e c a y R a t e ] ;   
+n e t S t a t e L r n    --  [ N e t w o r k S t a t e    c r e a t e A t F i l e N a m e : " L e a r n F i l e "   
+f o r N o d e L i s t :   o u t p u t L a y e r   p r i n t N o d e N u m b e r s :   OFF]; 
+
+/ / S t e p    3  - t e a c h   t h e   n e t w o r k   
+/ / o p e n    datafile w i t h   l e a r n i n g    d a t a   
+fpL =  f o p e n ( " l r n . d a t a " ,    "r"); 
+/ / o p e n    datafile into w h i c h   o u t p u t   l a y e r   o u t p u t s    are w r i t t e n   
+fpU =  f o p e n ( " C o m p a r e " ,    " w " ) ;
+/ / p r i n t    w e i g h t s    b e f o r e    s t a r t i n g    t h e    l e a r n i n g    p r o c e s s   
+[ n e t S t a t e L m    p r i n t W e i g h t s ] ;   
+for (i  =  0;  i <  n r L e a r n V e c t o r s ;    i + + )   
+{ 
+d o u b l e    x; 
+for (j  =  0,  j <  n r I n p u t N o d e s ;    j +   +) / / r e a d    v a l u e s   
+{ 
+fscanf(fpL,  " % f " ,    &x) 
+[ [ i n p u t L a y e r    at:j ] input:x]; 
+} 
+fscanf(fpL,  "kn"); 
+[ i n p u t L a y e r    e l e m e n t s P e r f o r m : " c o m p u t e O u t p u t " ] ;   
+[ c o m p L r n U p d t    u p d a t e ] ;   / / p e r f o r m   u p d a t e   
+fprint(fpU,  "\n"); 
+for (k  =  0;  k <  n r O u t p u t N o d e s ;   k +   +) 
+fprintf(fpU,  " % 5 . 2 f   ",  [ [ o u t p u t L a y e r    at:k]  output]); 
+} 
+/ / p r i n t    w e i g h t s    a f t e r   l e a r n i n g   
+[ n e t S t a t e L r n    p r i n t W e i g h t s ] ;
+
+/ / S t e p    4  - t e s t    h o w    n e t    r e s p o n d s    t o   o t h e r    d a t a   
+/ / o p e n    datafile  w i t h    t e s t    d a t a   
+fpT  =  f o p e n    ( " t e s t . d a t a " ,    "r"); 
+for (i  =  0,  i <  n r T e s t V e c t o r s ;    i +   +) / / r u n    t h e    t e s t    d a t a   
+{ 
+d o u b l e    x; 
+for (j  =  0 ; j <    n r I n p u t N o d e s ;    j + + )   
+{ 
+fscanf(fpT,  " % f " ,    &x); 
+[ [ i n p u t L a y e r    at:j]  input:x]; 
+} 
+fscanf(fpT,  "\n"); 
+[ i n p u t L a y e r    e l e m e n t s P e r f o r m : " c o m p u t e O u t p u t " ] ;   
+[ c o m p L r n U p d t    u p d a t e O u t p u t s ] ;   
+fprintf(fpU,  "kn"); 
+for (k  --  0,  k <  n r O u t p u t N o d e s ;   k +   +) 
+fprintf(fpU,  " % 5 . 2 f   ",  [ [ o u t p u t L a y e r    at:k]  output]); 
+} 
+/ / o t h e r    c l e a n u p s    - s u c h    a s    c l o s i n g    files  a n d    so o n   
+/ / e n d    of m a i n   p r o g r a m   
+}
+
+C r e a t e    t h e    H i d d e n   L a y e r   N o d e s   
+for (i  =  0;  i <  n r H i d d e n N o d e s ;   i + + )   
+{ 
+d o u b l e    m a g ,    r a n d N r ,    w e i g h t s [ 1 0 ] ;   
+n o d e    = [ B a s i c N o d e    c r e a t e ] ;   
+[ h i d d e n L a y e r    a d d :   node]; 
+m a g    =  0.0; 
+for (j  =  0;  j <  n r I n p u t N o d e s ;    j + + )   { 
+r a n d N r    = (double)  ] r a n d G e n    n e x t R a n d o m ] ;   
+w e i g h t s [ j ]    =  r a n d N r ;   
+m a g    + =    p o w ( r a n d N r ,    2.0); 
+mug =  sqrt(mag); 
+for (j  =  0;  j <nrInputNodes; j + + )   
+{ 
+weights[j]  =  weights[j]/mag; 
+[node addPredecessor:[inputLayer at:j] weight:weights[j]]; 
+} 
+}
+
+//Extra instances of classes CompLrnUpdt  and NetworkState for the hidden layer 
+compLrnHid =  [CompLrnUpdt createForLayer :hiddenLayer lrnRate:0.9 
+decayRatePercent: 10.0]; 
+netStateHid =  [NetworkState createAtFileName:"HiddenFile" 
+forNodeList :hiddenLayer printNodeNumbers: OFF];
+
+//Update hidden layer before output layer
+[inputLayer elementsPerform :"computeOutput"]; 
+[compLrnHid update]; / / p e r f o r m   u p d a t e   
+[compLrnOut update]; / / p e r f o r m   u p d a t e   
